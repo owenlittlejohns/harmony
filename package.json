@@ -15,7 +15,8 @@
     "watch-debug": "nodemon --inspect=5858 -e ts,tsx --exec node -r tsconfig-paths/register -r ts-node/register app/server.ts",
     "postinstall": "if test \"$NODE_ENV\" != \"production\" ; then lerna exec -- npm install; fi",
     "build": "docker build -t harmonyservices/harmony:${VERSION:-latest} .",
-    "publish": "docker push harmonyservices/harmony:${VERSION:-latest}"
+    "publish": "docker push harmonyservices/harmony:${VERSION:-latest}",
+    "populate-graph": "ts-node graph/populate-graph.ts"
   },
   "keywords": [
     "NASA",
@@ -93,6 +94,7 @@
     "multer-s3": "^2.9.0",
     "mustache": "^4.2.0",
     "mustache-express": "^1.3.0",
+    "neo4j-driver": "^4.3.2",
     "node-fetch": "^2.6.1",
     "p-queue": "^7.1.0",
     "pg": "8.6.0",
