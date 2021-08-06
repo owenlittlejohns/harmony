@@ -4,6 +4,7 @@ import { keysToLowerCase } from '../../util/object';
 import { RequestValidationError } from '../../util/errors';
 import wrap from '../../util/array';
 import parseVariables from './util/variable-parsing';
+import addRequiredVariables from './util/required-variables';
 import { parseSubsetParams, subsetParamsToBbox, subsetParamsToTemporal, ParameterParseError } from './util/parameter-parsing';
 import { parseAcceptHeader } from '../../util/content-negotiation';
 import parseMultiValueParameter from '../../util/parameter-parsing';
@@ -11,6 +12,7 @@ import HarmonyRequest from '../../models/harmony-request';
 import { createDecrypter, createEncrypter } from '../../util/crypto';
 import parseCRS from '../../util/crs';
 import env from '../../util/env';
+
 /**
  * Express middleware that responds to OGC API - Coverages coverage
  * rangeset requests.  Responds with the actual coverage data.
@@ -21,11 +23,11 @@ import env from '../../util/env';
  * @throws RequestValidationError - Thrown if the request has validation problems and
  *   cannot be performed
  */
-export default function getCoverageRangeset(
+async function getCoveragesRangeset(
   req: HarmonyRequest,
   res: Response,
   next: NextFunction,
-): void {
+): Promise<void> {
   req.context.frontend = 'ogcCoverages';
   const query = keysToLowerCase(req.query);
 
@@ -82,7 +84,13 @@ export default function getCoverageRangeset(
     throw e;
   }
 
-  const varInfos = parseVariables(req.collections, req.params.collectionId);
+  // Parse variables from the original request URL
+  let varInfos = parseVariables(req.collections, req.params.collectionId);
+
+  // Augment variable set with required variables based on associations stored
+  // in a graph database
+  varInfos = await addRequiredVariables(varInfos);
+
   for (const varInfo of varInfos) {
     operation.addSource(varInfo.collectionId, varInfo.variables);
   }
@@ -90,3 +98,5 @@ export default function getCoverageRangeset(
   req.operation = operation;
   next();
 }
+
+export = getCoveragesRangeset;

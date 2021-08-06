@@ -1,7 +1,7 @@
 import { CmrCollection, CmrUmmVariable } from '../../../util/cmr';
 import { RequestValidationError } from '../../../util/errors';
 
-interface VariableInfo {
+export interface VariableInfo {
   collectionId: string;
   variables?: CmrUmmVariable[];
 }

@@ -1,8 +1,10 @@
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
 import _ from 'lodash';
+import sinon from 'sinon';
 import hookCmr from '../helpers/stub-cmr';
 import isUUID from '../../app/util/uuid';
+import * as requiredVariables from '../../app/frontends/ogc-coverages/util/required-variables';
 import { expectedNoOpJobKeys, itIncludesRequestUrl } from '../helpers/jobs';
 import { hookSignS3Object } from '../helpers/object-store';
 import { hookPostRangesetRequest, hookRangesetRequest, rangesetRequest } from '../helpers/ogc-api-coverages';
@@ -17,6 +19,16 @@ describe('OGC API Coverages - getCoverageRangeset', function () {
   const version = '1.0.0';
 
   hookServersStartStop();
+
+  let addRequiredVariables;
+
+  beforeEach(function () {
+    addRequiredVariables = sinon.stub(requiredVariables, 'default').resolvesArg(0);
+  });
+
+  afterEach(function () {
+    addRequiredVariables.restore();
+  });
 
   describe('when provided a valid set of parameters', function () {
     const query = {
